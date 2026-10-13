@@ -124,3 +124,6 @@ pip-selfcheck.json
 # Local development files
 implementation_plan.md
 fix_profiles.py
+# Server data — never commit (local DB and uploaded files)
+db.sqlite3
+media/

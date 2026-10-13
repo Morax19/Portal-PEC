@@ -1,0 +1,10 @@
+-r requirements.txt
+pytest>=7.4
+pytest-django>=4.5
+pytest-cov>=4.1
+black>=23.0             
+flake8>=6.0           
+isort>=5.12             
+django-debug-toolbar>=4.1
+django-extensions>=3.2
+ipython>=8.12
