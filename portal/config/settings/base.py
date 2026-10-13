@@ -21,13 +21,26 @@ DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': env('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
+}
+
+# Use Cloudinary for media uploads only when credentials are provided;
+# otherwise fall back to storing files on disk (MEDIA_ROOT).
+USE_CLOUDINARY = all([
+    CLOUDINARY_STORAGE['CLOUD_NAME'],
+    CLOUDINARY_STORAGE['API_KEY'],
+    CLOUDINARY_STORAGE['API_SECRET'],
+])
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
     'django.contrib.sites',
@@ -39,8 +52,14 @@ INSTALLED_APPS = [
     'django_ckeditor_5',
     'taggit',
     'user_visit',
-    'cloudinary',
 ]
+
+# Cloudinary apps are only needed when media is actually stored there. They
+# must stay AFTER django.contrib.staticfiles: django-cloudinary-storage ships
+# its own 'collectstatic' command which reads the removed STATICFILES_STORAGE
+# setting (Django >= 4.2) and would otherwise shadow Django's command.
+if USE_CLOUDINARY:
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -112,20 +131,6 @@ STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default=''),
-    'API_KEY': env('CLOUDINARY_API_KEY', default=''),
-    'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
-}
-
-# Use Cloudinary for media uploads only when credentials are provided;
-# otherwise fall back to storing files on disk (MEDIA_ROOT).
-USE_CLOUDINARY = all([
-    CLOUDINARY_STORAGE['CLOUD_NAME'],
-    CLOUDINARY_STORAGE['API_KEY'],
-    CLOUDINARY_STORAGE['API_SECRET'],
-])
 
 AUTH_USER_MODEL = 'account.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
